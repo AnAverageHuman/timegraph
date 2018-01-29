@@ -1,7 +1,9 @@
 #!/usr/bin/Rscript
 
 library(argparse)
+library(dplyr)
 library(ggplot2)
+library(lubridate)
 
 parse_arguments <- function() {
   parser <- ArgumentParser()
@@ -18,12 +20,17 @@ parse_arguments <- function() {
 parse_csv <- function(filename) {
   data <- read.csv(filename)
   data$date <- as.Date(data$date)
+  data$week <- week(data$date)
   data$hours <- data$end - data$start
   data
 }
 
 get_averages <- function(df) {
-  aggregate(df$hours, list(week = df$week), mean)
+  grouped <- df %>% group_by(week = week(date))
+  weekly <- grouped %>% summarize(average = mean(hours))
+  weekly$weekstart <- unique(floor_date(grouped$date, unit = "week"))
+  weekly$weekend <- unique(ceiling_date(grouped$date, unit = "week"))
+  weekly
 }
 
 # generate floating bar graph using boxplots
@@ -42,23 +49,28 @@ create_bargraph <- function(df) {
 }
 
 # generate hours scatterplot
-create_scatterplot <- function(df, w_avg) {
+create_scatterplot <- function(df) {
   ggplot(df, aes(x = date, y = hours, color = factor(week))) +
   theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust = 1)) +
   geom_point() +
   geom_smooth(inherit.aes = FALSE, se = FALSE, aes(x = date, y = hours)) +
-  geom_hline(aes(color = factor(week), yintercept = df$w_avg)) +
-  geom_hline(aes(color = "black", yintercept = mean(df$hours))) +
+  geom_segment(aes(x = weekstart,
+                   y = average,
+                   xend = weekend,
+                   yend = average,
+                   color = factor(week))) +
+  geom_hline(aes(color = "black", yintercept = mean(hours))) +
   scale_color_discrete(name   = "Average",
-                       labels = c(paste("Week", w_avg$week), "Total")) +
+                       labels = c(paste("Week", 1:length(unique(df$week))),
+                                  "Total")) +
   theme(legend.position = "bottom")
 }
 
 if (! interactive()) {
   args <- parse_arguments()
   df <- parse_csv(args$file)
-  w_avg <- get_averages(df)
-  df$w_avg <- rep(w_avg$x, table(df$week))
   ggsave("bars.png", plot = create_bargraph(df))
-  ggsave("averages.png", plot = create_scatterplot(df, w_avg))
+
+  weekly <- get_averages(df)
+  ggsave("averages.png", plot = create_scatterplot(merge(df, weekly)))
 }
