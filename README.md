@@ -3,7 +3,8 @@ Visualize the amount of time spent on an activity.
 
 ## Dependencies
 
-Requires R, and the [ggplot2 library](https://github.com/tidyverse/ggplot2).
+Requires R, the [tidyverse](https://github.com/tidyverse/tidyverse), and
+[argparse](https://github.com/trevorld/argparse).
 
 ## Usage
 
@@ -28,7 +29,7 @@ when it is longer.
 ### averages.png
 
 Plots each point in the CSV, calculating duration as `end - start`.
-Draws a smooth trend line through the points, and adds horizontal lines
+Draws a smooth trend line through the points, and adds horizontal line segments
 representing the average for each week.
 A horizontal line representing the average over all weeks is also drawn.
 
@@ -36,7 +37,8 @@ A horizontal line representing the average over all weeks is also drawn.
 
 `example.csv` includes data representing the amount of time spent sleeping on a
 given day, relative to midnight.
-For instance, on March 27, the user went to sleep at 23:00 and woke up at 06:30 the following day.
+For instance, on March 27, the user went to sleep at 23:00 and woke up at 06:30
+the following day.
 The plots for this set of data are shown below (click to enlarge):
 
 <p float="left">
