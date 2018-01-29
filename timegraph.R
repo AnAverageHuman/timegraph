@@ -17,7 +17,7 @@ parse_arguments <- function() {
 
 parse_csv <- function(filename) {
   data <- read.csv(filename)
-  data$date <- as.Date(data$date, format = "%m/%d")
+  data$date <- as.Date(data$date)
   data$hours <- data$end - data$start
   data
 }
