@@ -57,8 +57,7 @@ create_scatterplot <- function(df) {
   geom_segment(aes(x = weekstart,
                    y = average,
                    xend = weekend,
-                   yend = average,
-                   color = factor(week))) +
+                   yend = average)) +
   geom_hline(aes(color = "black", yintercept = mean(hours))) +
   scale_color_discrete(name   = "Average",
                        labels = c(paste("Week", 1:length(unique(df$week))),
